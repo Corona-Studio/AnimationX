@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Threading;
+using System.Windows;
 
 namespace AnimationX.Class.Model.Animations;
 
-public class DoubleAnimation : AnimationBase<double>
+public class ThicknessAnimation : AnimationBase<Thickness>
 {
-    private protected override void ComputeAnimation(CancelRequest cancelReq, Action<double> frameCall)
+    private protected override void ComputeAnimation(CancelRequest cancelReq, Action<Thickness> frameCall)
     {
         var sleepTime = 1d / DesiredFrameRate;
         var stepAmount = 1 / Duration.TotalSeconds / DesiredFrameRate;
@@ -22,8 +23,15 @@ public class DoubleAnimation : AnimationBase<double>
                     return;
                 }
 
-                var frameVal = From + (To - From) * EasingFunction.Ease(currentTime);
-                frameCall(frameVal ?? 0);
+                var from = From!.Value;
+                var to = To!.Value;
+                var left = from.Left + (to.Left - from.Left) * EasingFunction.Ease(currentTime);
+                var right = from.Right + (to.Right - from.Right) * EasingFunction.Ease(currentTime);
+                var top = from.Top + (to.Top - from.Top) * EasingFunction.Ease(currentTime);
+                var bottom = from.Bottom + (to.Bottom - from.Bottom) * EasingFunction.Ease(currentTime);
+
+                var frameThickness = new Thickness(left, top, right, bottom);
+                frameCall(frameThickness);
 
                 currentTime += stepAmount;
                 Thread.Sleep(TimeSpan.FromSeconds(sleepTime));
@@ -36,7 +44,7 @@ public class DoubleAnimation : AnimationBase<double>
         {
             IsBackground = true
         };
-        
+
         aniThread.Start();
     }
 }

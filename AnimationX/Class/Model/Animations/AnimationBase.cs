@@ -27,7 +27,7 @@ public abstract class AnimationBase<T> : IAnimation<T> where T : struct
         remove => _listEventDelegates.RemoveHandler(nameof(Ended), value);
     }
 
-    public virtual IEasingFunction EasingFunction { get; } = new LinearEase();
+    public virtual IEasingFunction EasingFunction { get; init; } = new LinearEase();
 
     public virtual T? From { get; set; }
     public virtual T? To { get; init; }
