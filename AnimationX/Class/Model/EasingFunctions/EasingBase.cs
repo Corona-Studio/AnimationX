@@ -5,7 +5,7 @@ namespace AnimationX.Class.Model.EasingFunctions;
 
 public abstract class EasingBase : IEasingFunction
 {
-    public EasingMode EasingMode { get; set; }
+    public EasingMode EasingMode { get; set; } = EasingMode.EaseOut;
 
     public double Ease(double normalizedTime)
     {

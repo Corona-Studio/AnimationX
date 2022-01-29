@@ -1,42 +1,11 @@
-﻿using System;
-using System.Threading;
-
-namespace AnimationX.Class.Model.Animations;
+﻿namespace AnimationX.Class.Model.Animations;
 
 public class DoubleAnimation : AnimationBase<double>
 {
-    private protected override void ComputeAnimation(CancelRequest cancelReq, Action<double> frameCall)
+    public override void ComputeNextFrame()
     {
-        var sleepTime = 1d / DesiredFrameRate;
-        var stepAmount = 1 / Duration.TotalSeconds / DesiredFrameRate;
-        var co = cancelReq;
-
-        var aniThread = new Thread(() =>
-        {
-            var currentTime = 0d;
-
-            do
-            {
-                if (co.IsCancelled)
-                {
-                    return;
-                }
-
-                var frameVal = From + (To - From) * EasingFunction.Ease(currentTime);
-                frameCall(frameVal ?? 0);
-
-                currentTime += stepAmount;
-                Thread.Sleep(TimeSpan.FromSeconds(sleepTime));
-            }
-            while (currentTime.CompareTo(1d) < 0);
-
-            IsRunning = false;
-            OnEnd(this, EventArgs.Empty);
-        })
-        {
-            IsBackground = true
-        };
-        
-        aniThread.Start();
+        var frameVal = From + (To - From) * EasingFunction.Ease(CurrentFrameTime);
+        CurrentFrame = frameVal ?? 0;
+        CurrentFrameTime += StepAmount;
     }
 }

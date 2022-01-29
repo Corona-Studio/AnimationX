@@ -1,19 +1,18 @@
-﻿using AnimationX.Interface;
+﻿using AnimationX.Class.Model.EasingFunctions;
+using AnimationX.Interface;
 using System;
-using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Windows;
-using AnimationX.Class.Model.EasingFunctions;
+using AnimationX.Class.Helper;
 
 namespace AnimationX.Class.Model.Animations;
 
-public abstract class AnimationBase<T> : IAnimation<T> where T : struct
+public abstract class AnimationBase<T> : IComputableAnimation, IAnimation<T> where T : struct
 {
-    private readonly ConcurrentBag<CancelRequest> _cancelBag = new ();
     private readonly EventHandlerList _listEventDelegates = new();
 
-    public DependencyObject? AnimateObject { get; set; }
-    public DependencyProperty? AnimateProperty { get; set; }
+    public DependencyObject? AnimateObject { get; init; }
+    public DependencyProperty? AnimateProperty { get; init; }
 
     public event EventHandler? Started
     {
@@ -27,17 +26,37 @@ public abstract class AnimationBase<T> : IAnimation<T> where T : struct
         remove => _listEventDelegates.RemoveHandler(nameof(Ended), value);
     }
 
+    public static int DesiredFrameRate { get; set; } = 60;
+
     public virtual IEasingFunction EasingFunction { get; init; } = new LinearEase();
 
+    private protected double StepAmount { get; set; }
+    private protected T CurrentFrame { get; set; }
+
+    public bool IsFinished => CurrentFrameTime.Equals3DigitPrecision(1d);
+    public double CurrentFrameTime { get; private protected set; }
     public virtual T? From { get; set; }
     public virtual T? To { get; init; }
     public TimeSpan Duration { get; init; } = TimeSpan.FromSeconds(0.5);
 
-    public virtual int DesiredFrameRate { get; init; } = 30;
-
     public bool IsRunning { get; private protected set; }
 
-    public virtual async void Begin()
+    private async void ResetAnimation()
+    {
+        if (From == null)
+        {
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                From = (T)AnimateObject!.GetValue(AnimateProperty);
+            });
+        }
+
+        CurrentFrame = From!.Value;
+        CurrentFrameTime = 0;
+        StepAmount = 1 / Duration.TotalSeconds / DesiredFrameRate;
+    }
+
+    public virtual void Begin()
     {
         if (To == null)
             throw new ArgumentNullException(nameof(To));
@@ -46,50 +65,9 @@ public abstract class AnimationBase<T> : IAnimation<T> where T : struct
         if (AnimateProperty == null)
             throw new ArgumentNullException(nameof(AnimateProperty));
 
-        foreach (var co in _cancelBag)
-        {
-            co.Set();
-        }
-
-        _cancelBag.Clear();
-
-        if (From == null)
-        {
-            await Application.Current.Dispatcher.InvokeAsync(() =>
-            {
-                From = (T) AnimateObject!.GetValue(AnimateProperty);
-            });
-        }
-
-        IsRunning = true;
-
-        if (From.Equals(To))
-        {
-            IsRunning = false;
-            OnEnd(this, EventArgs.Empty);
-
-            return;
-        }
-        
-        OnStart(this, EventArgs.Empty);
-
-        var cancelObj = new CancelRequest();
-
-        ComputeAnimation(cancelObj, UpdateCore);
-        _cancelBag.Add(cancelObj);
+        ResetAnimation();
+        this.CommitAnimation();
     }
-
-    private protected virtual void UpdateCore(T val)
-    {
-        if (AnimateObject == null || AnimateProperty == null) return;
-
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            AnimateObject.SetValue(AnimateProperty, val);
-        });
-    }
-
-    private protected abstract void ComputeAnimation(CancelRequest cancelReq, Action<T> frameCall);
 
     public virtual void OnStart(object sender, EventArgs e)
     {
@@ -103,5 +81,31 @@ public abstract class AnimationBase<T> : IAnimation<T> where T : struct
         var eventList = _listEventDelegates;
         var @event = (EventHandler)eventList[nameof(Ended)]!;
         @event?.Invoke(sender, e);
+    }
+
+    public abstract void ComputeNextFrame();
+
+    public virtual void UpdateFrame()
+    {
+        if (AnimateObject == null || AnimateProperty == null) return;
+
+        Application.Current.Dispatcher?.Invoke(() =>
+        {
+            AnimateObject.SetValue(AnimateProperty, CurrentFrame);
+        });
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(AnimateObject, AnimateProperty, To, Duration);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is not AnimationBase<T> ani) return false;
+
+        return AnimateObject == ani.AnimateObject &&
+               AnimateProperty == ani.AnimateProperty &&
+               Duration == ani.Duration;
     }
 }
