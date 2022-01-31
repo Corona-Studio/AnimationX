@@ -14,7 +14,7 @@ internal static class AnimationHelper
 
     static AnimationHelper()
     {
-        SleepTime = 1d / AnimationBase<int>.DesiredFrameRate;
+        SleepTime = 1d / TimeLineAnimationBase.DesiredFrameRate;
         AnimationList = new ConcurrentDictionary<int, IComputableAnimation>();
         AnimationComputeThread = new Thread(StartCompute)
         {
@@ -31,7 +31,15 @@ internal static class AnimationHelper
         {
             foreach (var (_, animation) in AnimationList)
             {
-                if(animation.IsFinished) continue;
+                if (animation.IsFinished)
+                {
+                    if (!animation.IsFinishedInvoked)
+                    {
+                        animation.InvokeOnEnd();
+                    }
+
+                    continue;
+                }
 
                 animation.ComputeNextFrame();
                 animation.UpdateFrame();

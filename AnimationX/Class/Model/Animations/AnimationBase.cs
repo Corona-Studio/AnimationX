@@ -1,44 +1,22 @@
-﻿using AnimationX.Class.Model.EasingFunctions;
+﻿using AnimationX.Class.Helper;
 using AnimationX.Interface;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
-using AnimationX.Class.Helper;
 
 namespace AnimationX.Class.Model.Animations;
 
-public abstract class AnimationBase<T> : IComputableAnimation, IAnimation<T> where T : struct
+public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> where T : struct
 {
     private readonly EventHandlerList _listEventDelegates = new();
 
-    public DependencyObject? AnimateObject { get; init; }
-    public DependencyProperty? AnimateProperty { get; init; }
+    private protected double StepAmount { get; private set; }
 
-    public event EventHandler? Started
-    {
-        add => _listEventDelegates.AddHandler(nameof(Started), value);
-        remove => _listEventDelegates.RemoveHandler(nameof(Started), value);
-    }
-
-    public event EventHandler? Ended
-    {
-        add => _listEventDelegates.AddHandler(nameof(Ended), value);
-        remove => _listEventDelegates.RemoveHandler(nameof(Ended), value);
-    }
-
-    public static int DesiredFrameRate { get; set; } = 60;
-
-    public virtual IEasingFunction EasingFunction { get; init; } = new LinearEase();
-
-    private protected double StepAmount { get; set; }
-    private protected T CurrentFrame { get; set; }
-
-    public bool IsFinished => CurrentFrameTime.Equals3DigitPrecision(1d);
-    public double CurrentFrameTime { get; private protected set; }
+    private protected T CurrentComputedFrame { get; set; }
     public virtual T? From { get; set; }
-    public virtual T? To { get; init; }
-    public TimeSpan Duration { get; init; } = TimeSpan.FromSeconds(0.5);
-
+    public virtual T? To { get; set; }
+    
     public bool IsRunning { get; private protected set; }
 
     private async void ResetAnimation()
@@ -47,17 +25,35 @@ public abstract class AnimationBase<T> : IComputableAnimation, IAnimation<T> whe
         {
             await Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                From = (T)AnimateObject!.GetValue(AnimateProperty);
+                From = (T)AnimateObject!.GetValue(AnimateProperty!);
             });
         }
 
-        CurrentFrame = From!.Value;
-        CurrentFrameTime = 0;
-        StepAmount = 1 / Duration.TotalSeconds / DesiredFrameRate;
+        var totalSeconds = Duration switch
+        {
+            _ when Duration == Duration.Automatic => 0.75,
+            _ when Duration == Duration.Forever => double.NaN,
+            _ => Duration.TimeSpan.TotalSeconds
+        };
+
+        if (double.IsNaN(totalSeconds))
+        {
+            StepAmount = double.NaN;
+            return;
+        }
+
+        IsFinishedInvoked = false;
+        CurrentComputedFrame = From ?? default;
+        StepAmount = 1d / (totalSeconds / SpeedRatio) / DesiredFrameRate;
+
+        CurrentFrame = 0;
+        TotalFrameCount = (long)Math.Ceiling(1 / StepAmount);
     }
 
-    public virtual void Begin()
+    public override void Begin()
     {
+        if(SpeedRatio is < 0 or double.NaN)
+            throw new ArgumentOutOfRangeException(nameof(SpeedRatio));
         if (To == null)
             throw new ArgumentNullException(nameof(To));
         if (AnimateObject == null)
@@ -66,38 +62,26 @@ public abstract class AnimationBase<T> : IComputableAnimation, IAnimation<T> whe
             throw new ArgumentNullException(nameof(AnimateProperty));
 
         ResetAnimation();
+
+        if (double.IsNaN(StepAmount)) return;
+        
+        OnStart(this, EventArgs.Empty);
         this.CommitAnimation();
     }
 
-    public virtual void OnStart(object sender, EventArgs e)
-    {
-        var eventList = _listEventDelegates;
-        var @event = (EventHandler)eventList[nameof(Started)]!;
-        @event?.Invoke(sender, e);
-    }
-
-    public virtual void OnEnd(object sender, EventArgs e)
-    {
-        var eventList = _listEventDelegates;
-        var @event = (EventHandler)eventList[nameof(Ended)]!;
-        @event?.Invoke(sender, e);
-    }
-
-    public abstract void ComputeNextFrame();
-
-    public virtual void UpdateFrame()
+    public override void UpdateFrame()
     {
         if (AnimateObject == null || AnimateProperty == null) return;
 
         Application.Current.Dispatcher?.Invoke(() =>
         {
-            AnimateObject.SetValue(AnimateProperty, CurrentFrame);
+            AnimateObject.SetValue(AnimateProperty, CurrentComputedFrame);
         });
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(AnimateObject, AnimateProperty, To, Duration);
+        return HashCode.Combine(AnimateObject, AnimateProperty);
     }
 
     public override bool Equals(object? obj)
@@ -107,5 +91,35 @@ public abstract class AnimationBase<T> : IComputableAnimation, IAnimation<T> whe
         return AnimateObject == ani.AnimateObject &&
                AnimateProperty == ani.AnimateProperty &&
                Duration == ani.Duration;
+    }
+
+    private protected override void OnStart(object sender, EventArgs e)
+    {
+        var eventList = _listEventDelegates;
+        var @event = (EventHandler)eventList[nameof(Started)]!;
+        @event?.Invoke(sender, e);
+    }
+
+    private protected override void OnEnd(object sender, EventArgs e)
+    {
+        var eventList = _listEventDelegates;
+        var @event = (EventHandler)eventList[nameof(Ended)]!;
+        @event?.Invoke(sender, e);
+
+        IsFinishedInvoked = true;
+        CurrentComputedFrame = To ?? default;
+        UpdateFrame();
+    }
+
+    public override event EventHandler? Started
+    {
+        add => _listEventDelegates.AddHandler(nameof(Started), value);
+        remove => _listEventDelegates.RemoveHandler(nameof(Started), value);
+    }
+
+    public override event EventHandler? Ended
+    {
+        add => _listEventDelegates.AddHandler(nameof(Ended), value);
+        remove => _listEventDelegates.RemoveHandler(nameof(Ended), value);
     }
 }

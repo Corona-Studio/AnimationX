@@ -5,19 +5,8 @@ namespace AnimationX.Interface;
 
 public interface IAnimation<T> where T : struct
 {
-    DependencyObject AnimateObject { get; }
-    DependencyProperty AnimateProperty { get; }
-
-    event EventHandler Started;
-    event EventHandler Ended;
-
-    T? From { get; }
-    T? To { get; }
-    IEasingFunction EasingFunction { get; }
-    
-    TimeSpan Duration { get; }
+    T? From { get; set; }
+    T? To { get; set; }
 
     bool IsRunning { get; }
-
-    void Begin();
 }
