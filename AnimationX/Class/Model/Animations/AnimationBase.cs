@@ -93,6 +93,12 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
                Duration == ani.Duration;
     }
 
+    public override void ComputeNextFrame()
+    {
+        CurrentFrameTime += StepAmount;
+        CurrentFrame++;
+    }
+
     private protected override void OnStart(object sender, EventArgs e)
     {
         var eventList = _listEventDelegates;

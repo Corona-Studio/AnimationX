@@ -8,7 +8,7 @@ public class DoubleAnimation : AnimationBase<double>
         var frameVal = From + (To - From) * progress;
 
         CurrentComputedFrame = frameVal ?? 0;
-        CurrentFrameTime += StepAmount;
-        CurrentFrame++;
+        
+        base.ComputeNextFrame();
     }
 }

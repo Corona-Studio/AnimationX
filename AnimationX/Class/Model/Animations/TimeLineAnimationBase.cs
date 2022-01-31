@@ -8,8 +8,6 @@ namespace AnimationX.Class.Model.Animations;
 
 public abstract class TimeLineAnimationBase : ITimeLineAnimation, IComputableAnimation
 {
-    
-
     public DependencyObject? AnimateObject { get; init; }
     public DependencyProperty? AnimateProperty { get; init; }
 
@@ -35,7 +33,6 @@ public abstract class TimeLineAnimationBase : ITimeLineAnimation, IComputableAni
     public abstract event EventHandler? Ended;
 
     private protected abstract void OnStart(object sender, EventArgs e);
-
     private protected abstract void OnEnd(object sender, EventArgs e);
 
     public void InvokeOnStart() => OnStart(this, EventArgs.Empty);

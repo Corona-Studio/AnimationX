@@ -19,7 +19,7 @@ public class ThicknessAnimation : AnimationBase<Thickness>
         var frameThickness = new Thickness(left, top, right, bottom);
 
         CurrentComputedFrame = frameThickness;
-        CurrentFrameTime += StepAmount;
-        CurrentFrame++;
+
+        base.ComputeNextFrame();
     }
 }

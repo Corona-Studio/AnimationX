@@ -26,7 +26,7 @@ public class MatrixAnimation : AnimationBase<Matrix>
         };
 
         CurrentComputedFrame = currentMatrix;
-        CurrentFrameTime += StepAmount;
-        CurrentFrame++;
+
+        base.ComputeNextFrame();
     }
 }
