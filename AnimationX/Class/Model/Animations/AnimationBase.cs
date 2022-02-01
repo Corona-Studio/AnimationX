@@ -46,6 +46,7 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
         StepAmount = 1d / (totalSeconds / SpeedRatio) / DesiredFrameRate;
 
         CurrentFrame = 0;
+        CurrentFrameTime = 0;
         TotalFrameCount = (long)Math.Ceiling(1 / StepAmount);
     }
 
