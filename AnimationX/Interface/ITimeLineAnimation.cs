@@ -5,16 +5,16 @@ namespace AnimationX.Interface;
 
 public interface ITimeLineAnimation
 {
-    DependencyObject AnimateObject { get; }
-    DependencyProperty AnimateProperty { get; }
+    DependencyObject AnimateObject { get; set; }
+    DependencyProperty AnimateProperty { get; set; }
 
     event EventHandler Started;
     event EventHandler Ended;
 
-    double SpeedRatio { get; }
-    IEasingFunction EasingFunction { get; }
+    double SpeedRatio { get; set; }
+    IEasingFunction EasingFunction { get; set; }
 
-    Duration Duration { get; }
+    Duration Duration { get; set; }
 
     void Begin();
 }

@@ -2,11 +2,13 @@
 using AnimationX.Interface;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
+using System.Windows;
 
 namespace AnimationX.Class.Helper;
 
-internal static class AnimationHelper
+public static class AnimationHelper
 {
     private static readonly double SleepTime;
     private static readonly Thread AnimationComputeThread;
@@ -37,7 +39,7 @@ internal static class AnimationHelper
                     {
                         animation.InvokeOnEnd();
                     }
-
+                    
                     continue;
                 }
 
@@ -52,5 +54,14 @@ internal static class AnimationHelper
     internal static void CommitAnimation(this IComputableAnimation ani)
     {
         AnimationList.AddOrUpdate(ani.GetHashCode(), ani, (_, _) => ani);
+    }
+
+    public static void BeginAnimation(this DependencyObject obj, DependencyProperty property, TimeLineAnimationBase ani)
+    {
+        ani.AnimateObject = obj;
+        ani.AnimateProperty = property;
+
+        ani.Begin();
+        //ani.CommitAnimation(HashCode.Combine(obj, property));
     }
 }

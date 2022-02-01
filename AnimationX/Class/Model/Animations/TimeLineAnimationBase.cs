@@ -1,15 +1,14 @@
 ﻿using AnimationX.Class.Model.EasingFunctions;
 using AnimationX.Interface;
 using System;
-using System.ComponentModel;
 using System.Windows;
 
 namespace AnimationX.Class.Model.Animations;
 
 public abstract class TimeLineAnimationBase : ITimeLineAnimation, IComputableAnimation
 {
-    public DependencyObject? AnimateObject { get; init; }
-    public DependencyProperty? AnimateProperty { get; init; }
+    public DependencyObject? AnimateObject { get; set; }
+    public DependencyProperty? AnimateProperty { get; set; }
 
     public double CurrentFrameTime { get; private protected set; }
     public long CurrentFrame { get; private protected set; }
@@ -18,10 +17,10 @@ public abstract class TimeLineAnimationBase : ITimeLineAnimation, IComputableAni
     public bool IsFinishedInvoked { get; private protected set; }
     public bool IsFinished => CurrentFrame == TotalFrameCount;
 
-    public double SpeedRatio { get; init; } = 1d;
-    public Duration Duration { get; init; } = new(TimeSpan.FromSeconds(0.5));
+    public double SpeedRatio { get; set; } = 1d;
+    public Duration Duration { get; set; } = new(TimeSpan.FromSeconds(0.5));
 
-    public virtual IEasingFunction EasingFunction { get; init; } = new LinearEase();
+    public virtual IEasingFunction EasingFunction { get; set; } = new LinearEase();
 
     public static int DesiredFrameRate { get; set; } = 60;
 

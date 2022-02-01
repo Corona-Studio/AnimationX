@@ -2,7 +2,6 @@
 using AnimationX.Interface;
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Windows;
 
 namespace AnimationX.Class.Model.Animations;
@@ -11,7 +10,7 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 {
     private readonly EventHandlerList _listEventDelegates = new();
 
-    private protected double StepAmount { get; private set; }
+    private double StepAmount { get; set; }
 
     private protected T CurrentComputedFrame { get; set; }
     public virtual T? From { get; set; }
