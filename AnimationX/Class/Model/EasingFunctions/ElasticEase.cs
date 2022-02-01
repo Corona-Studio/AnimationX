@@ -12,6 +12,7 @@ public class ElasticEase : EasingBase
         var num = Math.Max(0.0, Oscillations);
         var d = Math.Max(0.0, Springiness);
 
-        return (d.CompareTo(0.0) != 0 ? (Math.Exp(d * time) - 1.0) / (Math.Exp(d) - 1.0) : time) * Math.Sin((2.0 * Math.PI * num + Math.PI / 2.0) * time);
+        return (d.CompareTo(0.0) != 0 ? (Math.Exp(d * time) - 1.0) / (Math.Exp(d) - 1.0) : time) *
+               Math.Sin((2.0 * Math.PI * num + Math.PI / 2.0) * time);
     }
 }

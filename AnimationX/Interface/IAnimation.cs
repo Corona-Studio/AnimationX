@@ -1,7 +1,4 @@
-﻿using System;
-using System.Windows;
-
-namespace AnimationX.Interface;
+﻿namespace AnimationX.Interface;
 
 public interface IAnimation<T> where T : struct
 {

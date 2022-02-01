@@ -1,8 +1,8 @@
-﻿using AnimationX.Class.Helper;
-using AnimationX.Interface;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Windows;
+using AnimationX.Class.Helper;
+using AnimationX.Interface;
 
 namespace AnimationX.Class.Model.Animations;
 
@@ -15,18 +15,16 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
     private protected T CurrentComputedFrame { get; set; }
     public virtual T? From { get; set; }
     public virtual T? To { get; set; }
-    
+
     public bool IsRunning { get; private protected set; }
 
     private async void ResetAnimation()
     {
         if (From == null)
-        {
             await Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                From = (T)AnimateObject!.GetValue(AnimateProperty!);
+                From = (T) AnimateObject!.GetValue(AnimateProperty!);
             });
-        }
 
         var totalSeconds = Duration switch
         {
@@ -47,12 +45,12 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 
         CurrentFrame = 0;
         CurrentFrameTime = 0;
-        TotalFrameCount = (long)Math.Ceiling(1 / StepAmount);
+        TotalFrameCount = (long) Math.Ceiling(1 / StepAmount);
     }
 
     public override void Begin()
     {
-        if(SpeedRatio is < 0 or double.NaN)
+        if (SpeedRatio is < 0 or double.NaN)
             throw new ArgumentOutOfRangeException(nameof(SpeedRatio));
         if (To == null)
             throw new ArgumentNullException(nameof(To));
@@ -64,7 +62,7 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
         ResetAnimation();
 
         if (double.IsNaN(StepAmount)) return;
-        
+
         OnStart(this, EventArgs.Empty);
         this.CommitAnimation();
     }
@@ -102,14 +100,14 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
     private protected override void OnStart(object sender, EventArgs e)
     {
         var eventList = _listEventDelegates;
-        var @event = (EventHandler)eventList[nameof(Started)]!;
+        var @event = (EventHandler) eventList[nameof(Started)]!;
         @event?.Invoke(sender, e);
     }
 
     private protected override void OnEnd(object sender, EventArgs e)
     {
         var eventList = _listEventDelegates;
-        var @event = (EventHandler)eventList[nameof(Ended)]!;
+        var @event = (EventHandler) eventList[nameof(Ended)]!;
         @event?.Invoke(sender, e);
 
         IsFinishedInvoked = true;

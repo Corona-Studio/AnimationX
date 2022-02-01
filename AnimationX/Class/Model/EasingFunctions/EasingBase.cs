@@ -13,7 +13,9 @@ public abstract class EasingBase : IEasingFunction
         {
             EasingMode.EaseIn => EaseCore(normalizedTime),
             EasingMode.EaseOut => 1.0 - EaseCore(1.0 - normalizedTime),
-            _ => normalizedTime >= 0.5 ? (1.0 - EaseCore((1.0 - normalizedTime) * 2.0)) * 0.5 + 0.5 : EaseCore(normalizedTime * 2.0) * 0.5,
+            _ => normalizedTime >= 0.5
+                ? (1.0 - EaseCore((1.0 - normalizedTime) * 2.0)) * 0.5 + 0.5
+                : EaseCore(normalizedTime * 2.0) * 0.5
         };
     }
 
