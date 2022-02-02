@@ -4,8 +4,14 @@ namespace AnimationX.Class.Helper;
 
 public static class CompareHelper
 {
+    private const double _2 = 0.01;
     private const double _3 = 0.001;
     private const double _4 = 0.0001;
+
+    public static bool Equals2DigitPrecision(this double left, double right)
+    {
+        return Math.Abs(left - right) < _2;
+    }
 
     public static bool Equals3DigitPrecision(this double left, double right)
     {

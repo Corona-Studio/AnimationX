@@ -6,6 +6,8 @@ public class ThicknessAnimation : AnimationBase<Thickness>
 {
     public override void ComputeNextFrame()
     {
+        base.ComputeNextFrame();
+
         var progress = EasingFunction.Ease(CurrentFrameTime);
         var from = From ?? default;
         var to = To!.Value;
@@ -18,7 +20,5 @@ public class ThicknessAnimation : AnimationBase<Thickness>
         var frameThickness = new Thickness(left, top, right, bottom);
 
         CurrentComputedFrame = frameThickness;
-
-        base.ComputeNextFrame();
     }
 }

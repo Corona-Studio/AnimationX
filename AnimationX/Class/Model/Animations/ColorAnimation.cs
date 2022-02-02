@@ -6,6 +6,8 @@ public class ColorAnimation : AnimationBase<Color>
 {
     public override void ComputeNextFrame()
     {
+        base.ComputeNextFrame();
+
         var progress = EasingFunction.Ease(CurrentFrameTime);
         var from = From ?? default;
         var to = To!.Value;
@@ -13,7 +15,5 @@ public class ColorAnimation : AnimationBase<Color>
         var frameVal = from + (to - from) * (float) progress;
 
         CurrentComputedFrame = frameVal;
-
-        base.ComputeNextFrame();
     }
 }

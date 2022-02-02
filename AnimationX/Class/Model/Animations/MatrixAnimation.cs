@@ -11,6 +11,8 @@ public class MatrixAnimation : AnimationBase<Matrix>
 
     public override void ComputeNextFrame()
     {
+        base.ComputeNextFrame();
+
         var progress = EasingFunction.Ease(CurrentFrameTime);
         var from = From ?? default;
         var to = To ?? default;
@@ -26,7 +28,5 @@ public class MatrixAnimation : AnimationBase<Matrix>
         };
 
         CurrentComputedFrame = currentMatrix;
-
-        base.ComputeNextFrame();
     }
 }

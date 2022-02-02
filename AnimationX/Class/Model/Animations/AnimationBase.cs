@@ -1,22 +1,35 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Data;
 using AnimationX.Class.Helper;
 using AnimationX.Interface;
 
 namespace AnimationX.Class.Model.Animations;
 
-public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> where T : struct
+public abstract class AnimationBase<T> : TimeLineAnimationBase, INotifyPropertyChanged, IAnimation<T> where T : struct
 {
     private readonly EventHandlerList _listEventDelegates = new();
 
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     private double StepAmount { get; set; }
 
-    private protected T CurrentComputedFrame { get; set; }
+    private T _currentComputedFrame;
+
+    public T CurrentComputedFrame
+    {
+        get => _currentComputedFrame;
+        set
+        {
+            _currentComputedFrame = value;
+            OnPropertyChanged();
+        }
+    }
+
     public virtual T? From { get; set; }
     public virtual T? To { get; set; }
-
-    public bool IsRunning { get; private protected set; }
 
     private async void ResetAnimation()
     {
@@ -39,13 +52,20 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
             return;
         }
 
+        BindingOperations.ClearBinding(AnimateObject!, AnimateProperty!);
+        BindingOperations.SetBinding(AnimateObject!, AnimateProperty!, new Binding(nameof(CurrentComputedFrame))
+        {
+            Source = this,
+            Mode = BindingMode.OneWay
+        });
+
         IsFinishedInvoked = false;
         CurrentComputedFrame = From ?? default;
-        StepAmount = 1d / (totalSeconds / SpeedRatio) / DesiredFrameRate;
+        StepAmount = Math.Round(1d / (totalSeconds / SpeedRatio) / DesiredFrameRate, 2, MidpointRounding.ToEven);
 
-        CurrentFrame = 0;
+        // CurrentFrame = 0;
         CurrentFrameTime = 0;
-        TotalFrameCount = (long) Math.Ceiling(1 / StepAmount);
+        // TotalFrameCount = (long) Math.Floor(1d / StepAmount) + 1;
     }
 
     public override void Begin()
@@ -66,17 +86,7 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
         OnStart(this, EventArgs.Empty);
         this.CommitAnimation();
     }
-
-    public override void UpdateFrame()
-    {
-        if (AnimateObject == null || AnimateProperty == null) return;
-
-        Application.Current.Dispatcher?.Invoke(() =>
-        {
-            AnimateObject.SetValue(AnimateProperty, CurrentComputedFrame);
-        });
-    }
-
+    
     public override int GetHashCode()
     {
         return HashCode.Combine(AnimateObject, AnimateProperty);
@@ -93,8 +103,9 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 
     public override void ComputeNextFrame()
     {
-        CurrentFrameTime += StepAmount;
-        CurrentFrame++;
+        var frameTime = Math.Round(CurrentFrameTime + StepAmount, 2);
+        CurrentFrameTime = Math.Min(1d, frameTime);
+        // CurrentFrame++;
     }
 
     private protected override void OnStart(object sender, EventArgs e)
@@ -111,8 +122,6 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
         @event?.Invoke(sender, e);
 
         IsFinishedInvoked = true;
-        CurrentComputedFrame = To ?? default;
-        UpdateFrame();
     }
 
     public override event EventHandler? Started
@@ -125,5 +134,12 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
     {
         add => _listEventDelegates.AddHandler(nameof(Ended), value);
         remove => _listEventDelegates.RemoveHandler(nameof(Ended), value);
+    }
+
+    // Create the OnPropertyChanged method to raise the event
+    // The calling member's name will be used as the parameter.
+    protected void OnPropertyChanged([CallerMemberName] string? name = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

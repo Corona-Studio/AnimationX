@@ -1,7 +1,7 @@
-﻿using System;
-using System.Windows;
-using AnimationX.Class.Model.EasingFunctions;
+﻿using AnimationX.Class.Model.EasingFunctions;
 using AnimationX.Interface;
+using System;
+using System.Windows;
 
 namespace AnimationX.Class.Model.Animations;
 
@@ -10,13 +10,10 @@ public abstract class TimeLineAnimationBase : ITimeLineAnimation, IComputableAni
     public static int DesiredFrameRate { get; set; } = 60;
 
     public double CurrentFrameTime { get; private protected set; }
-    public long CurrentFrame { get; private protected set; }
-    public long TotalFrameCount { get; private protected set; }
 
     public bool IsFinishedInvoked { get; private protected set; }
-    public bool IsFinished => CurrentFrame == TotalFrameCount;
+    public bool IsFinished => CurrentFrameTime == 1d; // CurrentFrame == TotalFrameCount;
     public abstract void ComputeNextFrame();
-    public abstract void UpdateFrame();
 
     public void InvokeOnStart()
     {
