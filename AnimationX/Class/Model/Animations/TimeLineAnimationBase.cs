@@ -1,7 +1,7 @@
-﻿using AnimationX.Class.Model.EasingFunctions;
-using AnimationX.Interface;
-using System;
+﻿using System;
 using System.Windows;
+using AnimationX.Class.Model.EasingFunctions;
+using AnimationX.Interface;
 
 namespace AnimationX.Class.Model.Animations;
 

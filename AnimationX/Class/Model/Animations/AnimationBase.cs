@@ -11,20 +11,18 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 {
     private readonly EventHandlerList _listEventDelegates = new();
 
+    private T _currentComputedFrame;
+
     private double StepAmount { get; set; }
 
-    private T _currentComputedFrame;
-    
     public T CurrentComputedFrame
     {
         get => _currentComputedFrame;
         set
         {
             _currentComputedFrame = value;
-            AnimateObject!.Dispatcher.BeginInvoke(() =>
-            {
-                AnimateObject!.SetValue(AnimateProperty!, value);
-            }, DispatcherPriority.Render);
+            AnimateObject!.Dispatcher.BeginInvoke(() => { AnimateObject!.SetValue(AnimateProperty!, value); },
+                DispatcherPriority.Render);
         }
     }
 
@@ -63,7 +61,7 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 
         IsFinishedInvoked = false;
         CurrentComputedFrame = From ?? default;
-        StepAmount = 1 / ((totalSeconds / SpeedRatio) * DesiredFrameRate);
+        StepAmount = 1 / (totalSeconds / SpeedRatio * DesiredFrameRate);
         // CurrentFrame = 0;
         CurrentFrameTime = 0;
         // TotalFrameCount = (long) Math.Floor(1d / StepAmount) + 1;
@@ -87,7 +85,7 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
         OnStart(this, EventArgs.Empty);
         this.CommitAnimation();
     }
-    
+
     public override int GetHashCode()
     {
         return HashCode.Combine(AnimateObject, AnimateProperty);
