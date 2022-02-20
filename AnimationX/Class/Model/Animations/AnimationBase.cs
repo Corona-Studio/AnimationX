@@ -21,8 +21,11 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
         set
         {
             _currentComputedFrame = value;
-            AnimateObject!.Dispatcher.BeginInvoke(() => { AnimateObject!.SetValue(AnimateProperty!, value); },
-                DispatcherPriority.Render);
+            AnimationHelper.Dispatcher.BeginInvoke(() =>
+                {
+                    AnimateObject!.SetValue(AnimateProperty!, value);
+                },
+                DispatcherPriority.Send);
         }
     }
 
@@ -32,7 +35,7 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
     private async void ResetAnimation()
     {
         if (From == null)
-            await Application.Current.Dispatcher.InvokeAsync(() =>
+            await AnimationHelper.Dispatcher.InvokeAsync(() =>
             {
                 From = (T) AnimateObject!.GetValue(AnimateProperty!);
             });
