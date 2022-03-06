@@ -11,6 +11,7 @@ public abstract class TimeLineAnimationBase : ITimeLineAnimation, IComputableAni
 
     public double CurrentFrameTime { get; private protected set; }
 
+    public bool RepeatForever { get; set; }
     public bool IsFinishedInvoked { get; private protected set; }
     public bool IsFinished => CurrentFrameTime == 1d; // CurrentFrame == TotalFrameCount;
     public abstract void ComputeNextFrame();

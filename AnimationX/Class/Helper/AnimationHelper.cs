@@ -60,4 +60,9 @@ public static class AnimationHelper
         ani.Begin();
         //ani.CommitAnimation(HashCode.Combine(obj, property));
     }
+
+    public static bool RemoveAnimation(this TimeLineAnimationBase ani)
+    {
+        return AnimationList.TryRemove(ani.GetHashCode(), out _);
+    }
 }

@@ -107,6 +107,9 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
     {
         var frameTime = CurrentFrameTime + StepAmount;
         CurrentFrameTime = Math.Min(1d, frameTime);
+
+        if (RepeatForever && CurrentFrameTime == 1d)
+            CurrentFrameTime = 0;
     }
 
     private protected override void OnStart(object sender, EventArgs e)

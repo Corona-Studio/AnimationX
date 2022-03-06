@@ -8,6 +8,7 @@ public interface ITimeLineAnimation
     DependencyObject AnimateObject { get; set; }
     DependencyProperty AnimateProperty { get; set; }
 
+    bool RepeatForever { get; set; }
     double SpeedRatio { get; set; }
     IEasingFunction EasingFunction { get; set; }
 
