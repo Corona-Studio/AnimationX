@@ -14,12 +14,8 @@ public static class AnimationHelper
     private static readonly Thread AnimationComputeThread;
     private static readonly ConcurrentDictionary<int, IComputableAnimation> AnimationList;
 
-    public static Dispatcher Dispatcher { get; }
-
     static AnimationHelper()
     {
-        Dispatcher = Dispatcher.CurrentDispatcher;
-
         SleepTime = 1d / TimeLineAnimationBase.DesiredFrameRate;
         AnimationList = new ConcurrentDictionary<int, IComputableAnimation>();
         AnimationComputeThread = new Thread(StartCompute);

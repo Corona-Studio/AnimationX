@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Threading;
 using AnimationX.Class.Helper;
 using AnimationX.Interface;
@@ -11,22 +12,19 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 {
     private readonly EventHandlerList _listEventDelegates = new();
 
-    private T _currentComputedFrame;
-
     private double StepAmount { get; set; }
 
     public T CurrentComputedFrame
     {
-        get => _currentComputedFrame;
-        set
-        {
-            _currentComputedFrame = value;
+        get;
+        set;
+        /*
             AnimationHelper.Dispatcher.BeginInvoke(() =>
                 {
                     AnimateObject!.SetValue(AnimateProperty!, value);
                 },
                 DispatcherPriority.Send);
-        }
+            */
     }
 
     public virtual T? From { get; set; }
@@ -35,7 +33,7 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
     private async void ResetAnimation()
     {
         if (From == null)
-            await AnimationHelper.Dispatcher.InvokeAsync(() =>
+            await Dispatcher.CurrentDispatcher.InvokeAsync(() =>
             {
                 From = (T) AnimateObject!.GetValue(AnimateProperty!);
             });
@@ -67,7 +65,14 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
         StepAmount = 1 / (totalSeconds / SpeedRatio * DesiredFrameRate);
         // CurrentFrame = 0;
         CurrentFrameTime = 0;
+
+        CompositionTarget.Rendering += CompositionTargetOnRendering;
         // TotalFrameCount = (long) Math.Floor(1d / StepAmount) + 1;
+    }
+
+    private void CompositionTargetOnRendering(object? sender, EventArgs e)
+    {
+        AnimateObject!.SetValue(AnimateProperty!, CurrentComputedFrame);
     }
 
     public override void Begin()
@@ -126,6 +131,8 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
         @event?.Invoke(sender, e);
 
         IsFinishedInvoked = true;
+
+        CompositionTarget.Rendering -= CompositionTargetOnRendering;
     }
 
     public override event EventHandler? Started
