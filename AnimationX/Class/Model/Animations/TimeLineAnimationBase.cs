@@ -10,8 +10,6 @@ public abstract class TimeLineAnimationBase : ITimeLineAnimation, IComputableAni
     public static int DesiredFrameRate { get; set; } = 60;
 
     public double CurrentFrameTime { get; private protected set; }
-
-    public bool RepeatForever { get; set; }
     public bool IsFinishedInvoked { get; private protected set; }
     public bool IsFinished => CurrentFrameTime == 1d; // CurrentFrame == TotalFrameCount;
     public abstract void ComputeNextFrame();
@@ -25,6 +23,8 @@ public abstract class TimeLineAnimationBase : ITimeLineAnimation, IComputableAni
     {
         OnEnd(this, EventArgs.Empty);
     }
+
+    public bool RepeatForever { get; set; }
 
     public DependencyObject? AnimateObject { get; set; }
     public DependencyProperty? AnimateProperty { get; set; }

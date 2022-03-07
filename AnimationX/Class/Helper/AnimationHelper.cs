@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Windows;
-using System.Windows.Threading;
 using AnimationX.Class.Model.Animations;
 using AnimationX.Interface;
 
