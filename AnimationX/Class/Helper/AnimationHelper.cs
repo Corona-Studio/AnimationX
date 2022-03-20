@@ -1,10 +1,9 @@
-﻿using System;
+﻿using AnimationX.Class.Model.Animations;
+using AnimationX.Interface;
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using AnimationX.Class.Model.Animations;
-using AnimationX.Interface;
 
 namespace AnimationX.Class.Helper;
 
@@ -18,7 +17,11 @@ public static class AnimationHelper
         SleepTime = 1d / TimeLineAnimationBase.DesiredFrameRate;
         AnimationList = new ConcurrentDictionary<int, IComputableAnimation>();
 
-        Task.Run(StartCompute);
+        var thread = new Thread(StartCompute)
+        {
+            IsBackground = true
+        };
+        thread.Start();
     }
 
     private static void StartCompute()
