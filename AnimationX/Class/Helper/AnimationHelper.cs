@@ -1,9 +1,9 @@
-﻿using AnimationX.Class.Model.Animations;
-using AnimationX.Interface;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Windows;
+using AnimationX.Class.Model.Animations;
+using AnimationX.Interface;
 
 namespace AnimationX.Class.Helper;
 
