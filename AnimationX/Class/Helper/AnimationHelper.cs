@@ -10,8 +10,9 @@ namespace AnimationX.Class.Helper;
 
 public static class AnimationHelper
 {
-    private static readonly double SleepTime;
     private static readonly ConcurrentDictionary<int, IComputableAnimation> AnimationList;
+
+    public static double SleepTime { get; }
 
     static AnimationHelper()
     {
@@ -31,6 +32,7 @@ public static class AnimationHelper
         {
             foreach (var (_, animation) in AnimationList)
             {
+                if(animation.IsPausing) continue;
                 if (animation.IsFinished)
                 {
                     if (!animation.IsFinishedInvoked) animation.InvokeOnEnd();
@@ -48,6 +50,11 @@ public static class AnimationHelper
     internal static void CommitAnimation(this IComputableAnimation ani)
     {
         AnimationList.AddOrUpdate(ani.GetHashCode(), ani, (_, _) => ani);
+    }
+
+    internal static void RemoveAnimation(this IComputableAnimation ani)
+    {
+        AnimationList.TryRemove(ani.GetHashCode(), out _);
     }
 
     public static void BeginAnimation(this DependencyObject obj, DependencyProperty property, TimeLineAnimationBase ani)

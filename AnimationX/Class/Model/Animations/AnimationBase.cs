@@ -1,10 +1,10 @@
-﻿using System;
+﻿using AnimationX.Class.Helper;
+using AnimationX.Interface;
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
-using AnimationX.Class.Helper;
-using AnimationX.Interface;
 
 namespace AnimationX.Class.Model.Animations;
 
@@ -14,17 +14,17 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 
     private double StepAmount { get; set; }
 
+    private bool _isFrameUpdated;
+
+    private T _currentComputedFrame;
     public T CurrentComputedFrame
     {
-        get;
-        set;
-        /*
-            AnimationHelper.Dispatcher.BeginInvoke(() =>
-                {
-                    AnimateObject!.SetValue(AnimateProperty!, value);
-                },
-                DispatcherPriority.Send);
-            */
+        get => _currentComputedFrame;
+        set
+        {
+            _isFrameUpdated = false;
+            _currentComputedFrame = value;
+        }
     }
 
     public virtual T? From { get; set; }
@@ -65,13 +65,21 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
         StepAmount = 1 / (totalSeconds / SpeedRatio * DesiredFrameRate);
         // CurrentFrame = 0;
         CurrentFrameTime = 0;
-
-        CompositionTarget.Rendering += CompositionTargetOnRendering;
+        
         // TotalFrameCount = (long) Math.Floor(1d / StepAmount) + 1;
     }
 
+    private TimeSpan _last = TimeSpan.Zero;
     private void CompositionTargetOnRendering(object? sender, EventArgs e)
     {
+        if (e is not RenderingEventArgs renderingEventArgs) return;
+
+        if (_last == renderingEventArgs.RenderingTime) return;
+        if (_isFrameUpdated) return;
+
+        _last = renderingEventArgs.RenderingTime;
+        _isFrameUpdated = true;
+
         AnimateObject!.SetCurrentValue(AnimateProperty!, CurrentComputedFrame);
     }
 
@@ -92,6 +100,23 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 
         OnStart(this, EventArgs.Empty);
         this.CommitAnimation();
+    }
+
+    public override void Stop()
+    {
+        this.RemoveAnimation();
+    }
+
+    public override void Pause()
+    {
+        IsPausing = true;
+        CompositionTarget.Rendering -= CompositionTargetOnRendering;
+    }
+
+    public override void Resume()
+    {
+        IsPausing = false;
+        CompositionTarget.Rendering += CompositionTargetOnRendering;
     }
 
     public override int GetHashCode()
@@ -119,6 +144,8 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 
     private protected override void OnStart(object sender, EventArgs e)
     {
+        CompositionTarget.Rendering += CompositionTargetOnRendering;
+
         var eventList = _listEventDelegates;
         var @event = (EventHandler) eventList[nameof(Started)]!;
         @event?.Invoke(sender, e);
@@ -131,7 +158,6 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
         @event?.Invoke(sender, e);
 
         IsFinishedInvoked = true;
-
         CompositionTarget.Rendering -= CompositionTargetOnRendering;
     }
 

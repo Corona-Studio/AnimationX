@@ -18,4 +18,8 @@ public interface ITimeLineAnimation
     event EventHandler Ended;
 
     void Begin();
+    void Stop();
+
+    void Pause();
+    void Resume();
 }

@@ -9,6 +9,7 @@ public abstract class TimeLineAnimationBase : ITimeLineAnimation, IComputableAni
 {
     public static int DesiredFrameRate { get; set; } = 60;
 
+    public bool IsPausing { get; private protected set; }
     public double CurrentFrameTime { get; private protected set; }
     public bool IsFinishedInvoked { get; private protected set; }
     public bool IsFinished => CurrentFrameTime == 1d; // CurrentFrame == TotalFrameCount;
@@ -34,11 +35,15 @@ public abstract class TimeLineAnimationBase : ITimeLineAnimation, IComputableAni
 
     public virtual IEasingFunction EasingFunction { get; set; } = new LinearEase();
 
-    public abstract void Begin();
-
     public abstract event EventHandler? Started;
     public abstract event EventHandler? Ended;
 
     private protected abstract void OnStart(object sender, EventArgs e);
     private protected abstract void OnEnd(object sender, EventArgs e);
+
+    public abstract void Begin();
+    public abstract void Stop();
+
+    public abstract void Pause();
+    public abstract void Resume();
 }
