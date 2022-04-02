@@ -72,7 +72,7 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 
     private void CompositionTargetOnRendering(object? sender, EventArgs e)
     {
-        AnimateObject!.SetValue(AnimateProperty!, CurrentComputedFrame);
+        AnimateObject!.SetCurrentValue(AnimateProperty!, CurrentComputedFrame);
     }
 
     public override void Begin()

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 using AnimationX.Class.Model.Animations;
 using AnimationX.Interface;
 
@@ -16,7 +17,7 @@ public static class AnimationHelper
     {
         SleepTime = 1d / TimeLineAnimationBase.DesiredFrameRate;
         AnimationList = new ConcurrentDictionary<int, IComputableAnimation>();
-
+        
         var thread = new Thread(StartCompute)
         {
             IsBackground = true
