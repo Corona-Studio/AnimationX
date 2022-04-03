@@ -64,6 +64,7 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
         CurrentComputedFrame = From ?? default;
         StepAmount = 1 / (totalSeconds / SpeedRatio * DesiredFrameRate);
         // CurrentFrame = 0;
+        _isFrameUpdated = false;
         CurrentFrameTime = 0;
         
         // TotalFrameCount = (long) Math.Floor(1d / StepAmount) + 1;
