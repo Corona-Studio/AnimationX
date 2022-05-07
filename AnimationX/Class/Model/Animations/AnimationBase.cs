@@ -1,10 +1,11 @@
-﻿using AnimationX.Class.Helper;
-using AnimationX.Interface;
-using System;
+﻿using System;
 using System.ComponentModel;
+using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using AnimationX.Class.Helper;
+using AnimationX.Interface;
 
 namespace AnimationX.Class.Model.Animations;
 
@@ -12,11 +13,14 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 {
     private readonly EventHandlerList _listEventDelegates = new();
 
-    private double StepAmount { get; set; }
+    private T _currentComputedFrame;
 
     private bool _isFrameUpdated;
 
-    private T _currentComputedFrame;
+    private long _last = 0;
+
+    private double StepAmount { get; set; }
+
     public T CurrentComputedFrame
     {
         get => _currentComputedFrame;
@@ -32,10 +36,15 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 
     private async void ResetAnimation()
     {
+        await Dispatcher.CurrentDispatcher.InvokeAsync(() =>
+        {
+            AnimateObject.SetValue(UIElement.CacheModeProperty, new BitmapCache());
+        });
+
         if (From == null)
             await Dispatcher.CurrentDispatcher.InvokeAsync(() =>
             {
-                From = (T) AnimateObject!.GetValue(AnimateProperty!);
+                From = (T)AnimateObject!.GetValue(AnimateProperty!);
             });
 
         var totalSeconds = Duration switch
@@ -66,19 +75,18 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
         // CurrentFrame = 0;
         _isFrameUpdated = false;
         CurrentFrameTime = 0;
-        
+
         // TotalFrameCount = (long) Math.Floor(1d / StepAmount) + 1;
     }
 
-    private TimeSpan _last = TimeSpan.Zero;
     private void CompositionTargetOnRendering(object? sender, EventArgs e)
     {
         if (e is not RenderingEventArgs renderingEventArgs) return;
-
-        if (_last == renderingEventArgs.RenderingTime) return;
+        
+        if (_last == renderingEventArgs.RenderingTime.Ticks) return;
         if (_isFrameUpdated) return;
 
-        _last = renderingEventArgs.RenderingTime;
+        _last = renderingEventArgs.RenderingTime.Ticks;
         _isFrameUpdated = true;
 
         AnimateObject!.SetCurrentValue(AnimateProperty!, CurrentComputedFrame);
@@ -148,14 +156,14 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
         CompositionTarget.Rendering += CompositionTargetOnRendering;
 
         var eventList = _listEventDelegates;
-        var @event = (EventHandler) eventList[nameof(Started)]!;
+        var @event = (EventHandler)eventList[nameof(Started)]!;
         @event?.Invoke(sender, e);
     }
 
     private protected override void OnEnd(object sender, EventArgs e)
     {
         var eventList = _listEventDelegates;
-        var @event = (EventHandler) eventList[nameof(Ended)]!;
+        var @event = (EventHandler)eventList[nameof(Ended)]!;
         @event?.Invoke(sender, e);
 
         IsFinishedInvoked = true;

@@ -38,12 +38,12 @@ public abstract class TimeLineAnimationBase : ITimeLineAnimation, IComputableAni
     public abstract event EventHandler? Started;
     public abstract event EventHandler? Ended;
 
-    private protected abstract void OnStart(object sender, EventArgs e);
-    private protected abstract void OnEnd(object sender, EventArgs e);
-
     public abstract void Begin();
     public abstract void Stop();
 
     public abstract void Pause();
     public abstract void Resume();
+
+    private protected abstract void OnStart(object sender, EventArgs e);
+    private protected abstract void OnEnd(object sender, EventArgs e);
 }

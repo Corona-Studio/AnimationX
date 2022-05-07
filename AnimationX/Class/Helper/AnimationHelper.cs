@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Windows;
-using System.Windows.Threading;
 using AnimationX.Class.Model.Animations;
 using AnimationX.Interface;
 
@@ -12,13 +11,11 @@ public static class AnimationHelper
 {
     private static readonly ConcurrentDictionary<int, IComputableAnimation> AnimationList;
 
-    public static double SleepTime { get; }
-
     static AnimationHelper()
     {
         SleepTime = 1d / TimeLineAnimationBase.DesiredFrameRate;
         AnimationList = new ConcurrentDictionary<int, IComputableAnimation>();
-        
+
         var thread = new Thread(StartCompute)
         {
             IsBackground = true
@@ -26,13 +23,15 @@ public static class AnimationHelper
         thread.Start();
     }
 
+    public static double SleepTime { get; }
+
     private static void StartCompute()
     {
         do
         {
             foreach (var (_, animation) in AnimationList)
             {
-                if(animation.IsPausing) continue;
+                if (animation.IsPausing) continue;
                 if (animation.IsFinished)
                 {
                     if (!animation.IsFinishedInvoked) animation.InvokeOnEnd();

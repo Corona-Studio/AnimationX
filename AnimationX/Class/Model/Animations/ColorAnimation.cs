@@ -12,7 +12,7 @@ public class ColorAnimation : AnimationBase<Color>
         var from = From ?? default;
         var to = To!.Value;
 
-        var frameVal = from + (to - from) * (float) progress;
+        var frameVal = from + (to - from) * (float)progress;
 
         CurrentComputedFrame = frameVal;
     }
