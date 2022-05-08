@@ -36,11 +36,6 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 
     private async void ResetAnimation()
     {
-        await Dispatcher.CurrentDispatcher.InvokeAsync(() =>
-        {
-            AnimateObject.SetValue(UIElement.CacheModeProperty, new BitmapCache());
-        });
-
         if (From == null)
             await Dispatcher.CurrentDispatcher.InvokeAsync(() =>
             {
