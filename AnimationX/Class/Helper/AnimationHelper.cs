@@ -18,7 +18,8 @@ public static class AnimationHelper
 
         var thread = new Thread(StartCompute)
         {
-            IsBackground = true
+            IsBackground = true,
+            Priority = ThreadPriority.AboveNormal
         };
         thread.Start();
     }
