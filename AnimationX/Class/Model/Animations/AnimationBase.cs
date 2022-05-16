@@ -16,7 +16,7 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
 
     private bool _isFrameUpdated;
 
-    private long _last = 0;
+    private long _last;
 
     private double StepAmount { get; set; }
 
@@ -76,7 +76,7 @@ public abstract class AnimationBase<T> : TimeLineAnimationBase, IAnimation<T> wh
     private void CompositionTargetOnRendering(object? sender, EventArgs e)
     {
         if (e is not RenderingEventArgs renderingEventArgs) return;
-        
+
         if (_last == renderingEventArgs.RenderingTime.Ticks) return;
         if (_isFrameUpdated) return;
 
