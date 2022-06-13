@@ -7,7 +7,7 @@ namespace AnimationX.Class.Model.Animations;
 
 public abstract class TimeLineAnimationBase : ITimeLineAnimation, IComputableAnimation
 {
-    public static int DesiredFrameRate { get; set; } = 60;
+    public static int DesiredFrameRate { get; set; } = 90;
 
     public bool IsPausing { get; private protected set; }
     public double CurrentFrameTime { get; private protected set; }
