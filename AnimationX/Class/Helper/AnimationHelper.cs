@@ -1,9 +1,9 @@
-﻿using AnimationX.Class.Model.Animations;
-using AnimationX.Interface;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Windows;
 using System.Windows.Media;
+using AnimationX.Class.Model.Animations;
+using AnimationX.Interface;
 
 namespace AnimationX.Class.Helper;
 
@@ -14,11 +14,14 @@ public static class AnimationHelper
 
     static AnimationHelper()
     {
-        SleepTime = TimeSpan.FromSeconds(1d / TimeLineAnimationBase.DesiredFrameRate).TotalSeconds * TimeSpan.TicksPerSecond;
+        SleepTime = TimeSpan.FromSeconds(1d / TimeLineAnimationBase.DesiredFrameRate).TotalSeconds *
+                    TimeSpan.TicksPerSecond;
         AnimationList = new ConcurrentDictionary<int, IComputableAnimation>();
-        
+
         CompositionTarget.Rendering += CompositionTargetOnRendering;
     }
+
+    public static double SleepTime { get; }
 
     private static void CompositionTargetOnRendering(object? sender, EventArgs e)
     {
@@ -29,8 +32,6 @@ public static class AnimationHelper
         _lastTick = currentTick;
         Compute();
     }
-
-    public static double SleepTime { get; }
 
     private static void Compute()
     {
