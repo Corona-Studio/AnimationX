@@ -1,16 +1,16 @@
-﻿using AnimationX.Class.Model.Animations;
-using AnimationX.Interface;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
+using AnimationX.Class.Model.Animations;
+using AnimationX.Interface;
 
 namespace AnimationX.Class.Helper;
 
 public static class AnimationHelper
 {
-    private static readonly ReaderWriterLockSlim Lock = new (LockRecursionPolicy.NoRecursion);
+    private static readonly ReaderWriterLockSlim Lock = new(LockRecursionPolicy.NoRecursion);
     private static readonly List<IComputableAnimation> AnimationList;
     private static long _lastTick = DateTime.Now.Ticks;
 
@@ -19,7 +19,7 @@ public static class AnimationHelper
         SleepTime = TimeSpan.FromSeconds(1d / TimeLineAnimationBase.DesiredFrameRate).TotalSeconds *
                     TimeSpan.TicksPerSecond;
         AnimationList = new List<IComputableAnimation>();
-        
+
         CompositionTarget.Rendering += CompositionTargetOnRendering;
     }
 
@@ -42,7 +42,7 @@ public static class AnimationHelper
         Lock.ExitReadLock();
 
         if (count == 0) return;
-        
+
         for (var i = count - 1; i >= 0; i--)
         {
             Lock.TryEnterReadLock(100);
@@ -62,7 +62,7 @@ public static class AnimationHelper
             }
 
             animation.ComputeNextFrame();
-        } 
+        }
     }
 
     internal static void CommitAnimation(this IComputableAnimation ani)
@@ -73,7 +73,7 @@ public static class AnimationHelper
             AnimationList.Remove(ani);
 
         AnimationList.Add(ani);
-        
+
         Lock.ExitWriteLock();
     }
 
